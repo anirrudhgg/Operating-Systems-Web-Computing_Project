@@ -20,9 +20,3 @@ Step 2. Open a new project with the flutter extension by typing 'flutter create 
 Step 3. Access the project folder by going to the terminal and typing 'cd [folder_name]'
 Step 4. Access the 'folder_name/lib/main.dart' and then the code can be modfied as necessary 
 Step 5. Run the terminal with 'flutter run -d web-server' and copy and paste the link onto the webpage.
-
-FINAL PROJECT (LOADOUT_LOCKER)
-
-The project done here is called Loadout Locker. The basic explanation is given under 'Contents'. The future updates possible for this webpage include:
-1. Saving the DPI,sensitivity and graphc settings for pc and the Completed percentages for Console
-2. The option of adding custom games that are not present in the list.
