@@ -3,6 +3,15 @@ import 'package:flutter/services.dart';
 
 void main() => runApp(const LoadoutLockerApp());
 
+/// Simple Data Store to keep settings in memory while the app is open.
+class AppData {
+  // PC Settings Store: Map<GameName, Settings>
+  static Map<String, Map<String, dynamic>> pcSettings = {};
+
+  // Console Progress Store: Map<GameName, Percentage>
+  static Map<String, double> consoleProgress = {};
+}
+
 class LoadoutLockerApp extends StatelessWidget {
   const LoadoutLockerApp({super.key});
 
@@ -24,26 +33,19 @@ class LoadoutLockerApp extends StatelessWidget {
   }
 }
 
-// 1. MAIN OPTIONS: PC and Console as Big Blocks (Left and Right)
+// 1. MAIN OPTIONS
 class MainCategoryPage extends StatelessWidget {
   const MainCategoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Loadout Locker'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Loadout Locker'), centerTitle: true),
       body: Row(
         children: [
-          Expanded(
-            child: _buildBigBlock(context, 'PC', Icons.computer, const Color(0xFF2196F3)),
-          ),
+          Expanded(child: _buildBigBlock(context, 'PC', Icons.computer, const Color(0xFF2196F3))),
           const VerticalDivider(width: 1, color: Colors.grey),
-          Expanded(
-            child: _buildBigBlock(context, 'Console', Icons.videogame_asset, const Color(0xFF4CAF50)),
-          ),
+          Expanded(child: _buildBigBlock(context, 'Console', Icons.videogame_asset, const Color(0xFF4CAF50))),
         ],
       ),
     );
@@ -59,9 +61,7 @@ class MainCategoryPage extends StatelessWidget {
         }
       },
       child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.white10),
-        ),
+        decoration: BoxDecoration(border: Border.all(color: Colors.white10)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -96,7 +96,7 @@ class PCGamesPage extends StatelessWidget {
   }
 }
 
-// 3. PC PROFILE SETTINGS (With Apply Button)
+// 3. PC PROFILE SETTINGS (Saves to AppData)
 class PCProfilePage extends StatefulWidget {
   final String gameName;
   const PCProfilePage({super.key, required this.gameName});
@@ -106,7 +106,29 @@ class PCProfilePage extends StatefulWidget {
 }
 
 class _PCProfilePageState extends State<PCProfilePage> {
-  String _selectedQuality = 'High';
+  late TextEditingController _dpiController;
+  late TextEditingController _sensController;
+  late String _selectedQuality;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load existing data or set defaults
+    var saved = AppData.pcSettings[widget.gameName] ?? {'dpi': '', 'sens': '', 'quality': 'High'};
+    _dpiController = TextEditingController(text: saved['dpi']);
+    _sensController = TextEditingController(text: saved['sens']);
+    _selectedQuality = saved['quality'];
+  }
+
+  void _saveSettings() {
+    AppData.pcSettings[widget.gameName] = {
+      'dpi': _dpiController.text,
+      'sens': _sensController.text,
+      'quality': _selectedQuality,
+    };
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Settings Saved!')));
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,35 +137,21 @@ class _PCProfilePageState extends State<PCProfilePage> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Mouse Settings', style: TextStyle(fontSize: 18, color: Colors.cyanAccent)),
-            const TextField(decoration: InputDecoration(labelText: 'DPI')),
-            const TextField(decoration: InputDecoration(labelText: 'Sensitivity')),
-            const SizedBox(height: 30),
-            const Text('Graphics Quality', style: TextStyle(fontSize: 18, color: Colors.cyanAccent)),
+            TextField(controller: _dpiController, decoration: const InputDecoration(labelText: 'DPI')),
+            TextField(controller: _sensController, decoration: const InputDecoration(labelText: 'Sensitivity')),
+            const SizedBox(height: 20),
             DropdownButton<String>(
               isExpanded: true,
               value: _selectedQuality,
-              items: <String>['Low', 'Medium', 'High', 'Ultra'].map((String value) {
-                return DropdownMenuItem<String>(value: value, child: Text(value));
-              }).toList(),
+              items: ['Low', 'Medium', 'High', 'Ultra'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
               onChanged: (val) => setState(() => _selectedQuality = val!),
             ),
             const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Changes Applied Successfully!')),
-                  );
-                  Navigator.pop(context);
-                },
-                child: const Text('Apply', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent, minimumSize: const Size(double.infinity, 50)),
+              onPressed: _saveSettings,
+              child: const Text('Save & Apply', style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -160,66 +168,92 @@ class ConsoleSelectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Console')),
-      body: ListView(
+      body: Column(
         children: [
-          _consoleOption(context, 'PS5'),
-          _consoleOption(context, 'Xbox Series X/S'),
+          ListTile(title: const Text('PS5'), onTap: () => _nav(context, 'PS5')),
+          ListTile(title: const Text('Xbox Series X/S'), onTap: () => _nav(context, 'Xbox')),
         ],
       ),
     );
   }
 
-  Widget _consoleOption(BuildContext context, String title) {
-    return ListTile(
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ConsoleGamesPage(platform: title))),
-    );
+  void _nav(BuildContext context, String platform) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ConsoleGamesPage(platform: platform)));
   }
 }
 
-// 5. CONSOLE GAMES LIST (With Numerical Completion Box)
-class ConsoleGamesPage extends StatelessWidget {
+// 5. CONSOLE GAMES LIST (With Progress Bar and Real-time Save)
+class ConsoleGamesPage extends StatefulWidget {
   final String platform;
   const ConsoleGamesPage({super.key, required this.platform});
 
+  @override
+  State<ConsoleGamesPage> createState() => _ConsoleGamesPageState();
+}
+
+class _ConsoleGamesPageState extends State<ConsoleGamesPage> {
   List<String> getGames() {
-    if (platform == 'PS5') {
-      return ['Spider-Man 2', 'Gran Turismo 7', 'GTA 5', 'Ghost of Tsushima', 'Assassins Creed Mirage'];
-    } else {
-      return ['Forza Horizon', 'Gears of War', 'Metal Gear Solid', 'Battlefield 6'];
-    }
+    return widget.platform == 'PS5' 
+      ? ['Spider-Man 2', 'Gran Turismo 7', 'GTA 5'] 
+      : ['Forza Horizon', 'Gears of War', 'Halo'];
   }
 
   @override
   Widget build(BuildContext context) {
+    final games = getGames();
     return Scaffold(
-      appBar: AppBar(title: Text('$platform Games')),
+      appBar: AppBar(title: Text('${widget.platform} Games')),
       body: ListView.builder(
-        itemCount: getGames().length,
-        itemBuilder: (context, index) => Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(getGames()[index], style: const TextStyle(fontSize: 16)),
-                SizedBox(
-                  width: 80,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Comp. %',
-                      border: OutlineInputBorder(),
+        itemCount: games.length,
+        itemBuilder: (context, index) {
+          String game = games[index];
+          double progress = AppData.consoleProgress[game] ?? 0.0;
+
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(game, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      SizedBox(
+                        width: 60,
+                        child: TextFormField(
+                          initialValue: (progress * 100).toInt().toString(),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          decoration: const InputDecoration(hintText: '%'),
+                          onChanged: (val) {
+                            setState(() {
+                              double newVal = (double.tryParse(val) ?? 0).clamp(0, 100) / 100;
+                              AppData.consoleProgress[game] = newVal;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  // PROGRESS BAR
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 10,
+                      backgroundColor: Colors.white10,
+                      color: Colors.greenAccent,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  Text('${(progress * 100).toInt()}% Completed', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
