@@ -13,10 +13,14 @@ choose your mode of play (either PC or console which is further split into xbox 
 
 STEPS
 The Steps to download and run the Flutter app within Vs Code and also how to use the Terminal to create the webpage 
-Note: For Mac you need to either have Xcode in apple or you should modify the settings in the safari browser and modify the code to run on the web server.
+Note: For Mac you need to either have Xcode in apple or you should modify the settings in the safari browser and modify the code to run on the web server. (also use the name of your own files in [project_name] and [folder_name])
 
 Step 1. Download the Extensions of Flutter onto your VS Code from the extensions tab
+
 Step 2. Open a new project with the flutter extension by typing 'flutter create [Project_name]' and replace the dots with the name of the project.
+
 Step 3. Access the project folder by going to the terminal and typing 'cd [folder_name]'
+
 Step 4. Access the 'folder_name/lib/main.dart' and then the code can be modfied as necessary 
+
 Step 5. Run the terminal with 'flutter run -d web-server' and copy and paste the link onto the webpage.
