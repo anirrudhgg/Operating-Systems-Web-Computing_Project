@@ -1,7 +1,7 @@
 # Operating Systems and Web Computing Project
 This is the Final Project for an OperatingSystems/Web Computing Project, This repository contains 2 parts:
 
-CONTENTS
+I. CONTENTS
 1. A Demo project created using the flutter extension within VS code. Once the extension is downloaded, the extension can be accessed via terminal on mac. 
 This opens a Webpage on the browser which has a title 'Flutter Demo Home Page'. It also contains a button on the bottom right with a '+' logo and a counter in
 the middle of the screen that updates everytime the button is clicked.
@@ -11,7 +11,7 @@ choose your mode of play (either PC or console which is further split into xbox 
 'Sensitivty' and 'Graphics Quality', For Console games you can input the numerical percentage value of how much of the game you have completed.
 
 
-STEPS
+II. STEPS
 The Steps to download and run the Flutter app within Vs Code and also how to use the Terminal to create the webpage 
 Note: For Mac you need to either have Xcode in apple or you should modify the settings in the safari browser and modify the code to run on the web server. (also use the name of your own files in [project_name] and [folder_name])
 
@@ -24,3 +24,9 @@ Step 3. Access the project folder by going to the terminal and typing 'cd [folde
 Step 4. Access the 'folder_name/lib/main.dart' and then the code can be modfied as necessary 
 
 Step 5. Run the terminal with 'flutter run -d web-server' and copy and paste the link onto the webpage.
+
+
+III. Credits
+1. Anirudh Gopishankar
+
+2. Yohan Amaratunga
