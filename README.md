@@ -1,5 +1,5 @@
 # Operating Systems and Web Computing Project
-This is the Final Project for an OperatingSystems/Web Computing Project, This repository contains 2 parts:
+This is the Final Project for an OperatingSystems/Web Computing Project and uses Dart programming language. This repository contains 2 parts:
 
 I. CONTENTS
 1. A Demo project created using the flutter extension within VS code. Once the extension is downloaded, the extension can be accessed via terminal on mac. 
